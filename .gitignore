@@ -8,6 +8,7 @@ __pycache__/
 instance/
 .env
 .env.*
+.python-version
 
 # Streamlit
 .streamlit/secrets.toml
