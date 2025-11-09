@@ -3,6 +3,9 @@ import plotly.express as px
 
 def weekly_revenue(df: pd.DataFrame):
 
+    # Make a copy to avoid modifying original DataFrame
+    df = df.copy()
+
     # Ensure created_at is datetime
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
 

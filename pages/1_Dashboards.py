@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+from dotenv import load_dotenv  # NEW
+
 from transformations.total_card import total_card
 from transformations.quantity_card import quantity_card
 from transformations.average_order_value_card import average_order_value_card
@@ -10,9 +13,17 @@ from transformations.new_customer_count_card import new_customer_count_card
 from transformations.top_customers_card import top_customers_card
 from transformations.cumulative_customer_count import cumulative_customer_count
 
-st.set_page_config(page_title="Dashboards", layout="wide")
+# --- Load environment variables ---
+load_dotenv()
 
+# --- Streamlit config ---
+st.set_page_config(page_title="Dashboards", layout="wide")
 st.title("Dashboards")
+
+# --- Load data paths from environment variables ---
+sales_data_path = os.getenv("SALES_DATA_PATH", "./data/sales.csv")
+customers_data_path = os.getenv("CUSTOMERS_DATA_PATH", "./data/customers.csv")
+customer_sales_path = os.getenv("CUSTOMER_SALES_PATH", "./data/customer_sales.csv")
 
 # Create tabs
 sales_tab, customers_tab = st.tabs(["Sales", "Customers"])
@@ -21,7 +32,7 @@ sales_tab, customers_tab = st.tabs(["Sales", "Customers"])
 with sales_tab:
 
     # Load your data once (replace with actual data source)
-    raw_df = pd.read_csv("./data/sales.csv")
+    raw_df = pd.read_csv(sales_data_path)
     raw_df['created_at'] = pd.to_datetime(raw_df['created_at'])  # ensure datetime column
 
     # --- Date Filter ---
@@ -95,18 +106,18 @@ with sales_tab:
 
     with left_col:
         st.subheader("Top Products")
-        st.dataframe(top_products_card(df), hide_index=True, use_container_width=True)
+        st.dataframe(top_products_card(df), hide_index=True, width='stretch')
 
     with right_col:
         st.subheader("Weekly Revenue")
         fig = weekly_revenue(df)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
 # --- CUSTOMERS TAB ---
 with customers_tab:
 
     # Data
-    customer_df = pd.read_csv("./data/customers.csv")
+    customer_df = pd.read_csv(customers_data_path)
 
     # --- Row 1: KPI cards ---
     col1, col2 = st.columns(2)
@@ -120,17 +131,16 @@ with customers_tab:
         st.metric(label="New Customers This Year", value=f"{new_customer_count:,}")
 
     st.divider()
-    # --- Row 1: Table and Chart --- #
 
-    # Data
-    customer_sales = pd.read_csv("./data/customer_sales.csv")
+    # --- Row 1: Table and Chart --- #
+    customer_sales = pd.read_csv(customer_sales_path)
 
     left_col, right_col = st.columns([1, 2])
     with left_col:
         st.subheader("Top Customers")
-        st.dataframe(top_customers_card(customer_sales), hide_index=True, use_container_width=True)
+        st.dataframe(top_customers_card(customer_sales), hide_index=True, width='stretch')
 
     with right_col:
         st.subheader("Cumulative Customer Count")
         fig = cumulative_customer_count(customer_df)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
